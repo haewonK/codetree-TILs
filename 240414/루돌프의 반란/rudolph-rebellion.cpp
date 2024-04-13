@@ -20,6 +20,7 @@ int s_state[31]={0,};//기절여부  기절x =0 기절하면 +1,
 bool s_out[31]={false,}; //산타 out 당했는지 확인 
 int pnt_s[31]={0,};
 int now_r,now_c;
+bool all_santa=false;
 bool boom_ru_s=false;
 bool boom_s_ru=false;
 int check_dist(int r1, int c1,int r2,int c2){
@@ -40,11 +41,12 @@ bool s_move(int idx){
     queue<int>q;
 
     q.push(idx);
-    while(!q.empty()){
+    
         int x=q.front(); q.pop();
         int candi=1000000;
         int pri_s=4;
         int chk_sr,chk_sc;
+        int dir=0;
         for(int i=0;i<4;i++){ //최단 거리구해야함 
             now_r=sr[x]+s_dx[i];
             now_c=sc[x]+s_dy[i];
@@ -58,6 +60,7 @@ bool s_move(int idx){
                 chk_sr=now_r;
                 chk_sc=now_c;
                 move_possible=true;
+                dir=i;
             }
         }
         if(move_possible==false) return false;
@@ -66,13 +69,48 @@ bool s_move(int idx){
             sr[x]=chk_sr;
             sc[x]=chk_sc;
             if(sr[x]==ru_r&&sc[x]==ru_c) boom_s_ru=true;
-            return true;
+            //return true;
+        }
+    
+
+    //밀리는 산타있는지 확인 
+
+    if(boom_s_ru) {
+        int k=info[ru_r][ru_c];
+        pnt_s[k]+=d;
+        sr[x]=chk_sr+(-1*s_dx[dir]);
+        sc[x]=chk_sc+(-1*s_dy[dir]);
+        while(1){
+            all_santa=false;
+            for(int i=1;i<=n;i++){
+                if(s_out[i]==true) all_santa=true; 
+            }
+            if(all_santa==false) break;
+
+
+            if(info[sr[x]][sc[x]]!=x&&info[sr[x]][sc[x]]!=0&&info[sr[x]][sc[x]]!=-1){ //다른 산타가 씌여진 곳 
+                int tmp= info[sr[x]][sc[x]];
+                sr[tmp]+=(-1*s_dx[dir]); //밀기 
+                sc[tmp]+=(-1*s_dy[dir]);
+                info[sr[x]][sc[x]]=x;
+
+                if(sr[tmp]>n||sc[tmp]>n||sr[tmp]<1||sc[tmp]<1) {
+                    s_out[tmp]=true;
+                    break;
+                }
+                else {
+                    x=tmp;
+                }
+
+            }
+            else if(info[sr[x]][sc[x]]==0){
+                info[sr[x]][sc[x]]=x;
+                break;
+            }
         }
     }
 
-    
-
-
+    return true;
 }
 bool ru_move(int r, int c){
     bool move_possible=false;
@@ -80,6 +118,7 @@ bool ru_move(int r, int c){
     int candi=1000000;
     int chk_rr=0,chk_rc=0;
     int depth=0; 
+    int dir=0;
     //초기화 필요 
 
 
@@ -128,29 +167,49 @@ bool ru_move(int r, int c){
         ru_r=chk_rr;
         ru_c=chk_rc;
         if(info[ru_r][ru_c]!=0) boom_ru_s=true;
-        return true;
+        
     }
+    //밀리는 산타있는지 확인 
 
-}
-
-void bomb(int ru_r,int ru_c,int s_r,int s_c,int dir,bool flag){
-    if(flag==boom_ru_s) {
+    if(boom_ru_s) {
         int k=info[ru_r][ru_c];
         pnt_s[k]+=c;
+        sr[k]=chk_rr+(-1*s_dx[dir]);
+        sc[k]=chk_rc+(-1*s_dy[dir]);
+        while(1){
+            all_santa=false;
+            for(int i=1;i<=n;i++){
+                if(s_out[i]==true) all_santa=true; 
+            }
+            if(all_santa==false) break;
 
+            if(info[sr[k]][sc[k]]!=k&&info[sr[k]][sc[k]]!=0&&info[sr[k]][sc[k]]!=-1){ //다른 산타가 씌여진 곳 
+                int tmp= info[sr[k]][sc[k]];
+                sr[tmp]+=(-1*s_dx[dir]); //밀기 
+                sc[tmp]+=(-1*s_dy[dir]);
+                info[sr[k]][sc[k]]=k;
+
+                if(sr[tmp]>n||sc[tmp]>n||sr[tmp]<1||sc[tmp]<1) {
+                    s_out[tmp]=true;
+                    break;
+                }
+                else {
+                    k=tmp;
+                }
+
+            }
+            else if(info[sr[k]][sc[k]]==0){
+                info[sr[k]][sc[k]]=k;
+                break;
+            }
+        }
     }
-    else if (flag==boom_s_ru){
-        int k=info[ru_r][ru_c];
-        pnt_s[k]+=d;
-
-    }
 
 
 
+
+    return true;
 }
-
-
-
 
 
 int main() {
@@ -165,9 +224,14 @@ int main() {
         info[r][c]=p_n; // 산타면 산타 번호 넣기 
     }
 
-   // for(int i=0;i<m;i++){ // m번의 턴 
+for(int i=0;i<m;i++){ // m번의 턴 
+    for(int j=1;j<=n;j++){
+        s_move(j);
+    }
+    ru_move(ru_r,ru_c);
 
-   // }
+
+}
 
 
 
