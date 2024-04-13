@@ -37,7 +37,7 @@ bool possible(int idx,int dir){
         if(nr[x]<1 || nc[x] <1 || nr[x]+h[x]-1 > l || nc[x]+w[x]-1 > l) {
             return false;
         }
-        for(int i=nr[x];i<=nr[x]+h[i]-1;i++){
+        for(int i=nr[x];i<=nr[x]+h[x]-1;i++){
             for(int j=nc[x];j<=nc[x]+w[x]-1;j++){
                 if(info[i][j]==1) {//함정 
                     dmg[x]++;
@@ -106,7 +106,6 @@ int main(){
     for(int i=1;i<=n;i++){
         if(k[i]>0){
             ans+=life[i]-k[i];
-            cout<<"i: "<<i<<k[i]<<endl;
         }
     }
     cout<<ans;
